@@ -1,0 +1,30 @@
+#install.packages("VennDiagram")
+
+
+library(VennDiagram)      #引用包
+setwd("C:\\180geoImmune(FGR)\\06.vennInflammation")     #设置工作目录
+geneList=list()
+
+#读取差异分析的结果文件
+rt=read.table("diff.txt", header=T, sep="\t", check.names=F)
+geneNames=as.vector(rt[,1])              #提取差异基因的名称
+geneNames=gsub("^ | $","",geneNames)     #去掉基因首尾的空格
+uniqGene=unique(geneNames)               #对差异基因取unique
+geneList[["DEG"]]=uniqGene
+
+#读取免疫基因的列表文件
+rt=read.table("GeneList.txt", header=T, sep="\t", check.names=F)
+geneNames=as.vector(rt[,1])              #提取免疫基因的名称
+geneNames=gsub("^ | $","",geneNames)     #去掉基因首尾的空格
+uniqGene=unique(geneNames)               #对免疫基因取unique
+geneList[["IRG"]]=uniqGene
+
+#绘制venn图
+venn.plot=venn.diagram(geneList,filename=NULL,fill=c("cornflowerblue", "darkorchid1"),scaled=FALSE,cat.pos=c(-1,1),cat.col = c("cornflowerblue", "darkorchid1"),cat.cex = 1.2)
+pdf(file="venn.pdf", width=5, height=5)
+grid.draw(venn.plot)
+dev.off()
+
+#输出交集基因的列表
+interGenes=Reduce(intersect, geneList)
+write.table(interGenes, file="interGene.txt", sep="\t", quote=F, col.names=F, row.names=F)
